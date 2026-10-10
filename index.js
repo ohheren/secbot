@@ -5,15 +5,15 @@ const fetch = require('node-fetch');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Variables from Render Environment
-const TOKEN = process.env.DISCORD_TOKEN;
-const CLIENT_ID = process.env.CLIENT_ID;
-const CLIENT_SECRET = process.env.CLIENT_SECRET;
+// Discord Credentials & Settings
+const TOKEN = process.env.DISCORD_TOKEN || 'MTU1ODQ3MDc1MjYyMDExODAxNw.GN3SJg.cDFqlTUavVKjP7rZ-5aIkNPQujSmXb20i_Me-0';
+const CLIENT_ID = process.env.CLIENT_ID || '1558470752620118017';
+const CLIENT_SECRET = process.env.CLIENT_SECRET || 'K5vqtlO7ZwfJ7HaaStHqQAIE7Q-YEMV8';
 const GUILD_ID = '1555276250573185028';
-const VERIFIED_ROLE_ID = '1555276250573185028'; // ضع آيدي رتبة التحقق هنا لو كان مختلفاً
+const VERIFIED_ROLE_ID = '1555276250573185028';
 
-// Auto-detect public URL on Render or fallback to localhost
-const RENDER_EXTERNAL_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+// External URL setup for Render
+const RENDER_EXTERNAL_URL = process.env.RENDER_EXTERNAL_URL || `https://secbot-xvoe.onrender.com`;
 const REDIRECT_URI = `${RENDER_EXTERNAL_URL}/callback`;
 
 const client = new Client({
@@ -24,15 +24,15 @@ const client = new Client({
     ]
 });
 
-// Express Web Server Routes
+// Express Web Routes
 app.get('/', (req, res) => {
-    res.send('<h1>Server is running successfully on Render!</h1>');
+    res.send('<h1>SecBot Verification Server is Live!</h1>');
 });
 
 app.get('/callback', async (req, res) => {
     const code = req.query.code;
     if (!code) {
-        return res.status(400).send('No code provided.');
+        return res.status(400).send('No authorization code provided.');
     }
 
     try {
@@ -53,7 +53,7 @@ app.get('/callback', async (req, res) => {
 
         const tokenData = await tokenResponse.json();
         if (!tokenData.access_token) {
-            return res.status(400).send('Failed to fetch access token.');
+            return res.status(400).send('Failed to exchange code for access token.');
         }
 
         const userResponse = await fetch('https://discord.com/api/users/@me', {
@@ -64,7 +64,7 @@ app.get('/callback', async (req, res) => {
 
         const userData = await userResponse.json();
 
-        // Assign role to the user in the target guild
+        // Assign Verified Role
         const guild = await client.guilds.fetch(GUILD_ID);
         if (guild) {
             const member = await guild.members.fetch(userData.id).catch(() => null);
@@ -73,28 +73,28 @@ app.get('/callback', async (req, res) => {
             }
         }
 
-        res.send('<h2>تم التحقق بنجاح! يمكنك إغلاق هذه الصفحة والعودة إلى ديسكورد.</h2>');
+        res.send('<h2>تمت عملية التحقق بنجاح! يمكنك الآن إغلاق العارض والعودة لتطبيق ديسكورد.</h2>');
     } catch (error) {
-        console.error('Error during OAuth callback:', error);
+        console.error('OAuth Callback Error:', error);
         res.status(500).send('An error occurred during verification.');
     }
 });
 
-// Bot commands and interaction
+// Setup Command
 client.on('messageCreate', async (message) => {
     if (message.content === '!setup-verify' && message.member.permissions.has('Administrator')) {
         const oauthUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify%20guilds.join`;
 
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
-                .setLabel('تحقق الآن / Verify')
+                .setLabel('اضغط هنا للتحقق / Verify Here')
                 .setStyle(ButtonStyle.Link)
                 .setURL(oauthUrl)
         );
 
         const embed = new EmbedBuilder()
-            .setTitle('نظام التحقق آلياً')
-            .setDescription('اضغط على الزر أدناه لتأكيد حسابك والحصول على الرتبة تلقائياً.')
+            .setTitle('نظام التحقق والتأكيد')
+            .setDescription('يرجى الضغط على الزر أدناه لإتمام عملية التحقق والحصول على الرتبة تلقائياً.')
             .setColor(0x2b2d31);
 
         await message.channel.send({ embeds: [embed], components: [row] });
@@ -102,14 +102,14 @@ client.on('messageCreate', async (message) => {
 });
 
 client.once('ready', () => {
-    console.log(`Logged in as ${client.user.tag}!`);
+    console.log(`Bot is logged in as ${client.user.tag}`);
 });
 
-// Start Express Server
+// Start Web Server
 app.listen(PORT, () => {
-    console.log(`Web server listening on port ${PORT}`);
-    console.log(`Redirect URI set to: ${REDIRECT_URI}`);
+    console.log(`Server listening on port ${PORT}`);
+    console.log(`Active Redirect URI: ${REDIRECT_URI}`);
 });
 
-// Login to Discord
+// Bot Login
 client.login(TOKEN);
