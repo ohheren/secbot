@@ -6,11 +6,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Discord Credentials & Settings
-const TOKEN = process.env.DISCORD_TOKEN || 'MTU1ODQ3MDc1MjYyMDExODAxNw.GN3SJg.cDFqlTUavVKjP7rZ-5aIkNPQujSmXb20i_Me-0';
-const CLIENT_ID = process.env.CLIENT_ID || '1558470752620118017';
-const CLIENT_SECRET = process.env.CLIENT_SECRET || 'K5vqtlO7ZwfJ7HaaStHqQAIE7Q-YEMV8';
-const GUILD_ID = '1555276250573185028';
-const VERIFIED_ROLE_ID = '1555276250573185028';
+const TOKEN = process.env.DISCORD_TOKEN || '';
+const CLIENT_ID = process.env.CLIENT_ID || '';
+const CLIENT_SECRET = process.env.CLIENT_SECRET || '';
+const GUILD_ID = '';
+const VERIFIED_ROLE_ID = '';
 
 // External URL setup for Render
 const RENDER_EXTERNAL_URL = process.env.RENDER_EXTERNAL_URL || `https://secbot-xvoe.onrender.com`;
